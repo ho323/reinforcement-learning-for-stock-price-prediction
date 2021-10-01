@@ -1,3 +1,27 @@
+'''
+속성
+initial_balacne: 초기 투자금
+balance: 현금 잔고
+num_stocks: 보유 주식 수
+portfolio_value: 포트폴리오 가치(투자금 잔고 + 주식 현재가 X 보유 주식수)
+num_buy: 매수 횟수
+num_sell: 매도 횟수
+num_hold: 관망 횟수
+immediate_reward: 즉시 보상
+profitloss: 현재 손익
+base_profitloss: 직전 지연 보상 이후 손익
+exploration_base: 탐험 행동 결정 기준
+
+함수
+reset(): 에이전트의 상태를 초기화
+set_balance(): 초기 자본금을 설정
+get_states(): 에이전트 상태를 휙득
+decide_action(): 탐험 또는 정책 신경망에 의한 행동 결정
+validate_action(): 행동의 유효성 판단
+decide_trading_unit(): 매수 또는 매도할 주식 수 결정
+act(): 행동 수행
+'''
+
 import random
 
 import numpy as np
@@ -32,7 +56,7 @@ class Agent:
         self.min_trading_unit = min_trading_unit  # 최소 단일 거래 단위
         self.max_trading_unit = max_trading_unit  # 최대 단일 거래 단위
         # 지연보상 임계치
-        self.delayed_reward_threshold = delayed_reward_threshold
+        ##self.delayed_reward_threshold = delayed_reward_threshold
 
         # Agent 클래스의 속성
         self.initial_balance = balance  # 초기 자본금
@@ -201,6 +225,9 @@ class Agent:
             (self.portfolio_value - self.initial_balance) / self.initial_balance
         )
 
+        return self.profitloss
+
+        '''
         # 즉시 보상 - 수익률
         self.immediate_reward = self.profitloss
 
@@ -221,3 +248,4 @@ class Agent:
             delayed_reward = 0
 
         return self.immediate_reward, delayed_reward
+        '''
