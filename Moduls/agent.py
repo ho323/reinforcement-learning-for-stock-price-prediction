@@ -80,7 +80,7 @@ class Agent:
 
     def reset(self):
         self.balance = self.initial_balance
-        self.num_sotcks = 0
+        self.num_stocks = 0
         self.portfolio_value = self.initial_balance
         self.base_portfolio_value = self.initial_balance
         self.num_buy = 0
@@ -152,7 +152,7 @@ class Agent:
                 return False
         elif action == Agent.ACTION_SELL:
             # 주식 잔고가 있는지 확인
-            if self.num_sotcks <= 0:
+            if self.num_stocks <= 0:
                 return False
         return True
 
@@ -197,7 +197,7 @@ class Agent:
                 * trading_unit
             if invest_amount > 0:
                 self.balance -= invest_amount  # 보유 현금을 갱신
-                self.num_sotcks += trading_unit  # 보유 주식 수를 갱신
+                self.num_stocks += trading_unit  # 보유 주식 수를 갱신
                 self.num_buy += 1  # 매수 횟수 증가
 
         # 매도
@@ -205,13 +205,13 @@ class Agent:
             # 매도할 단위를 판단
             trading_unit = self.decide_trading_unit(confidence)
             # 보유 주식이 모자랄 경우 가능한 만큼 최대한 매도
-            trading_unit = min(trading_unit, self.num_sotcks)
+            trading_unit = min(trading_unit, self.num_stocks)
             # 매도
             invest_amount = curr_price * (
                 1 - (self.TRADING_TAX + self.TRADING_CHARGE)) * trading_unit
             if invest_amount > 0:
-                self.avg_buy_price = (self.avg_buy_price * self.num_sotcks - curr_price) / (self.num_stocks - trading_unit) if self.num_stocks > trading_unit else 0  # 주당 매수 단가 갱신
-                self.num_sotcks -= trading_unit  # 보유 주식 수를 갱신
+                self.avg_buy_price = (self.avg_buy_price * self.num_stocks - curr_price) / (self.num_stocks - trading_unit) if self.num_stocks > trading_unit else 0  # 주당 매수 단가 갱신
+                self.num_stocks -= trading_unit  # 보유 주식 수를 갱신
                 self.balance += invest_amount  # 보유 현금을 갱신
                 self.num_sell += 1  # 매도 횟수 증가
 
@@ -220,7 +220,7 @@ class Agent:
             self.num_hold += 1  # 홀딩 횟수 증가
 
         # 포트폴리오 가치 갱신
-        self.portfolio_value = self.balance + curr_price * self.num_sotcks
+        self.portfolio_value = self.balance + curr_price * self.num_stocks
         self.profitloss = (
             (self.portfolio_value - self.initial_balance) / self.initial_balance
         )
