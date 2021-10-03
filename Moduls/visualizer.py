@@ -21,6 +21,7 @@ from agent import Agent
 
 lock = threading.Lock()
 
+
 class Visualizer:
     COLORS = ['r', 'b', 'g']
 
