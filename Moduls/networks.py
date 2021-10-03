@@ -17,8 +17,6 @@ get_shared_network(): 신경망의 상단부를 생성하는 클래스 함수
 import os
 import threading
 import numpy as np
-from tensorflow.python.keras.layers.core import Activation
-from tensorflow.python.ops.gen_batch_ops import Batch
 
 
 if os.environ['KERAS_BACKEND'] == 'tensorflow':
@@ -52,7 +50,7 @@ class Network:
     def predict(self, sample):
         with self.lock:
             return self.model.predict(sample).flatten()
-    
+
     def train_on_batch(self, x, y):
         loss = 0.
         with self.lock:
@@ -62,11 +60,11 @@ class Network:
 
     def save_model(self, model_path):
         if model_path is not None and self.model is not None:
-            self.model.save_weights(model_path, overwrit=True)
+            self.model.save_weights(model_path, overwrite=True)
 
     def load_model(self, model_path):
         if model_path is not None:
-            self.model.load_weight(model_path)
+            self.model.load_weights(model_path)
 
     @classmethod
     def get_shared_network(cls, net='dnn', num_steps=1, input_dim=0):
@@ -84,7 +82,7 @@ class DNN(Network):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         inp = None
-        output= None
+        output = None
         if self.shared_network is None:
             inp = Input((self.input_dim,))
             output = self.get_network_head(inp).output
@@ -95,7 +93,8 @@ class DNN(Network):
             self.output_dim, activation=self.activation, 
             kernel_initializer='random_normal')(output)
         self.model = Model(inp, output)
-        self.model.compile(optimizer=SGD(learning_rate=self.lr), loss=self.loss)
+        self.model.compile(
+            optimizer=SGD(learning_rate=self.lr), loss=self.loss)
 
     @staticmethod
     def get_network_head(inp):
@@ -124,6 +123,7 @@ class DNN(Network):
     def predict(self, sample):
         sample = np.array(sample).reshape((1, self.input_dim))
         return super().predict(sample)
+    
 
 class LSTMNetwork(Network):
     def __init__(self, *args, num_steps=1, **kwargs):
@@ -136,12 +136,13 @@ class LSTMNetwork(Network):
             output = self.get_network_head(inp).output
         else:
             inp = self.shared_network.input
-            output = self. get_shared_network.output
+            output = self.shared_network.output
         output = Dense(
             self.output_dim, activation=self.activation, 
             kernel_initializer='random_normal')(output)
         self.model = Model(inp, output)
-        self.model.compile(optimizer=SGD(learning_rate=self.lr), loss=self.loss)
+        self.model.compile(
+            optimizer=SGD(learning_rate=self.lr), loss=self.loss)
 
     @staticmethod
     def get_network_head(inp):
@@ -153,7 +154,7 @@ class LSTMNetwork(Network):
         output = BatchNormalization()(output)
         output = LSTM(64, dropout=0.1, return_sequences=True, stateful=False, kernel_initializer='random_normal')(output)
         output = BatchNormalization()(output)
-        output = LSTM(32, dropout=0.1, return_sequences=True, stateful=False, kernel_initializer='random_normal')(output)
+        output = LSTM(32, dropout=0.1, stateful=False, kernel_initializer='random_normal')(output)
         output = BatchNormalization()(output)
         return Model(inp, output)
 
@@ -177,9 +178,9 @@ class CNN(Network):
             output = self.get_network_head(inp).output
         else:
             inp = self.shared_network.input
-            output = self.get_shared_network.output
+            output = self.shared_network.output
         output = Dense(
-            self.output_dim, activation=self.activation, 
+            self.output_dim, activation=self.activation,
             kernel_initializer='random_normal')(output)
         self.model = Model(inp, output)
         self.model.compile(
@@ -187,20 +188,20 @@ class CNN(Network):
 
     @staticmethod
     def get_network_head(inp):
-        output = Conv2D(256, kernel_size=(1, 5), 
-            padding='same', activation='sigmoid', 
+        output = Conv2D(256, kernel_size=(1, 5),
+            padding='same', activation='sigmoid',
             kernel_initializer='random_normal')(inp)
         output = BatchNormalization()(output)
         output = MaxPooling2D(pool_size=(1, 2))(output)
         output = Dropout(0.1)(output)
         output = Conv2D(64, kernel_size=(1, 5),
-            padding='same', activation='sigmoid', 
+            padding='same', activation='sigmoid',
             kernel_initializer='random_normal')(output)
         output = BatchNormalization()(output)
-        output = MaxPooling2D()(output)
+        output = MaxPooling2D(pool_size=(1, 2))(output)
         output = Dropout(0.1)(output)
-        output = Conv2D(32, kernel_size=(1, 5), 
-            padding='same', activation='sigmoid', 
+        output = Conv2D(32, kernel_size=(1, 5),
+            padding='same', activation='sigmoid',
             kernel_initializer='random_normal')(output)
         output = BatchNormalization()(output)
         output = MaxPooling2D(pool_size=(1, 2))(output)
