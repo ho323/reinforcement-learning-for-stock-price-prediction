@@ -10,7 +10,7 @@ observe(): idx를 다음 위치로 이동하고 observation을 업데이트
 get_price(): 현재 observation에서 종가를 휙득
 '''
 
-class Enviroment:
+class Environment:
     PRICE_IDX = 4  # 종가의 위치
 
     def __init__(self, chart_data=None):
@@ -21,7 +21,7 @@ class Enviroment:
     def reset(self):
         self.observation = None
         self.idx = -1
-    
+
     def observe(self):
         if len(self.chart_data) > self.idx + 1:
             self.idx += 1
