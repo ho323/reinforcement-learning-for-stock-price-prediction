@@ -353,7 +353,7 @@ class ReinforcementLearner:
 
             # 에포크 종료 후 학습
             if learning:
-                self.fit()
+                self.fit()  # 가치 신경망 및 정책 신경망 학습 함수
 
             # 에포크 관련 정보 로그 기록
             num_epoches_digit = len(str(self.num_epoches))
