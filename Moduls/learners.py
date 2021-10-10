@@ -35,9 +35,11 @@ from networks import Network, DNN, LSTMNetwork, CNN
 from visualizer import Visualizer
 
 
+# DQNLearner, PolicyGradientLearner, ActorCriticLearner, A2CLearner 등의 클래스가 상속하는 상위 클래스
+# 강화학습에 필요한 환경, 에이전트, 신경망 인스턴스들과 학습 데이터를 속성으로 가집니다.
 class ReinforcementLearner:
-    __metaclass__ = abc.ABCMeta
-    lock = threading.Lock()
+    __metaclass__ = abc.ABCMeta  # 클래스의 메타클래스 정의
+    lock = threading.Lock()  # 해당 쓰레드만 공유 데이터에 접근할 수 있는 기능
 
     def __init__(self, rl_method='rl', stock_code=None, 
                 chart_data=None, training_data=None,
@@ -83,27 +85,30 @@ class ReinforcementLearner:
         self.reuse_models = reuse_models
         # 가시화 모듈
         self.visualizer = Visualizer()
-        # 메모리
+        # 메모리 (강화학습 과정에서 발생하는 각종 데이터를 쌓아두기 위함)
         self.memory_sample = []
         self.memory_action = []
         self.memory_reward = []
         self.memory_value = []
         self.memory_policy = []
-        self.memory_pv = []
-        self.memory_num_stocks = []
-        self.memory_exp_idx = []
+        self.memory_pv = []  # 포트폴리오 가치
+        self.memory_num_stocks = []  # 보유 주식 수
+        self.memory_exp_idx = []  # 탐험 위치
         self.memory_learning_idx = []
         # 에포크 관련 정보
-        self.loss = 0.
-        self.itr_cnt = 0
-        self.exploration_cnt = 0
+        self.loss = 0.  # 에포크 동안 학습에서 발생한 손실
+        self.itr_cnt = 0  # 수익 발생 횟수
+        self.exploration_cnt = 0  # 탐험 횟수
         self.batch_size = 0
-        self.learning_cnt = 0
+        self.learning_cnt = 0  # 학습 횟수
         # 로그 등 출력 경로
-        self.output_path = output_path
+        self.output_path = output_path  # 로그, 가시화, 학습모델 등 저장 경로
 
+    # net에 지정된 신경망 종류에 맞게 가치 신경망 생성 
+    # 손익률을 회귀분석하는 모델이라 activation은 선형 함수, 손실 함수로 MSE 설정
     def init_value_network(self, shared_network=None, 
             activation='linear', loss='mse'):
+        # 이 클래스들은 Network 클래스를 상속하므로 Network 클래스의 함수를 모두 갖고 있음
         if self.net == 'dnn':
             self.value_network = DNN(
                 input_dim=self.num_features, 
@@ -124,6 +129,7 @@ class ReinforcementLearner:
                 lr=self.lr, num_steps=self.num_steps, 
                 shared_network=shared_network, 
                 activation=activation, loss=loss)
+        # 경로에 모델이 존재하면 불러옴
         if self.reuse_models and os.path.exists(self.value_network_path):
                 self.value_network.load_model(model_path=self.value_network_path)
 
@@ -149,9 +155,11 @@ class ReinforcementLearner:
                 lr=self.lr, num_steps=self.num_steps, 
                 shared_network=shared_network, 
                 activation=activation, loss=loss)
+        # 경로에 모델이 존재하면 불러옴
         if self.reuse_models and os.path.exists(self.policy_network_path):
             self.policy_network.load_model(model_path=self.policy_network_path)
 
+    # 에포크마다 새로 데이터가 쌓이는 변수들을 초기화
     def reset(self):
         self.sample = None
         self.training_data_idx = -1
@@ -179,21 +187,24 @@ class ReinforcementLearner:
         self.learning_cnt = 0
 
     def build_sample(self):
-        self.environment.observe()
+        self.environment.observe()  # 차트 데이터의 현재 인덱스에서 다음 인덱스 데이터를 읽게 함
+        # 학습 데이터에 다음 인덱스 데이터가 존재하면
         if len(self.training_data) > self.training_data_idx + 1:
             self.training_data_idx += 1
-            self.sample = self.training_data.iloc[self.training_data_idx].tolist()
-            self.sample.extend(self.agent.get_states())
-            return self.sample
+            self.sample = self.training_data.iloc[self.training_data_idx].tolist()  # TRAINING_DATA_V3 47개
+            self.sample.extend(self.agent.get_states())  # 3개
+            return self.sample  # 총 50개의 값으로 리스트 구성
         return None
 
-    @abc.abstractmethod
+    # 학습 데이터 생성
+    @abc.abstractmethod  # 추상 메소드
     def get_batch(self):
-        pass
+        pass  # 하위 클래스들은 이 함수를 구현해야 함
 
+    # 신경망 학습
     def update_networks(self):
         # 배치 학습 데이터 생성
-        x, y_value, y_policy = self.get_batch()
+        x, y_value, y_policy = self.get_batch()  # 학습 데이터 생성
         if len(x) > 0:
             loss = 0
             if y_value is not None:
@@ -205,15 +216,19 @@ class ReinforcementLearner:
             return loss
         return None
 
+    # 배치 학습 데이터의 크기를 정하고 update_networks() 함수를 호출합니다.
     def fit(self):
         # 배치 학습 데이터 생성 및 신경망 갱신
         _loss = self.update_networks()
         if _loss is not None:
-            self.loss += abs(_loss)
-            self.learning_cnt += 1
-            self.memory_learning_idx.append(self.training_data_idx)
+            self.loss += abs(_loss)  # 위 함수로 반환받은 loss값을 loss에 더해주어 에포크 동안의 총 학습 손실을 갖게 됨.
+            self.learning_cnt += 1  # 학습 횟수 (나중에 loss를 학습 횟수로 나누어 에포크의 학습 손실)
+            self.memory_learning_idx.append(self.training_data_idx)  # 학습 위치 저장
 
+    # 하나의 에포크 관련 정보를 가시화 
+    # 대상: 에이전트의 행동, 보유 주식 수, 가치 신경망 출력, 정책 신경망 출력, 포트폴리오 가치, 탐험 위치, 학습 위치 등
     def visualize(self, epoch_str, num_epoches, epsilon):
+        # LSTM, CNN 신경망의 경우 환경의 일봉 수보다 (num_steps -1) 만큼 부족하기 때문에 첫 부분에 의미 없는 값을 채워줍니다. 
         self.memory_action = [Agent.ACTION_HOLD] * (self.num_steps - 1) + self.memory_action
         self.memory_num_stocks = [0] * (self.num_steps - 1) + self.memory_num_stocks
         if self.value_network is not None:
@@ -221,6 +236,8 @@ class ReinforcementLearner:
         if self.policy_network is not None:
             self.memory_policy = [np.array([np.nan] * len(Agent.ACTIONS))] * (self.num_steps - 1) + self.memory_policy
         self.memory_pv = [self.agent.initial_balance] * (self.num_steps - 1) + self.memory_pv
+        
+        # PNG 파일로 가시화해서 저장
         self.visualizer.plot(
             epoch_str=epoch_str, num_epoches=num_epoches, 
             epsilon=epsilon, action_list=Agent.ACTIONS, 
@@ -238,7 +255,9 @@ class ReinforcementLearner:
             'epoch_summary_{}.png'.format(epoch_str))
         )
 
+    # ReinforcementLearner 클래스의 핵심 함수
     def run(self, learning=True):
+        # 제목
         info = (
             "[{code}] RL:{rl} Net:{net} LR:{lr} "
             "DF:{discount_factor} TU:[{min_trading_unit},{max_trading_unit}]"
@@ -249,7 +268,7 @@ class ReinforcementLearner:
             max_trading_unit=self.agent.max_trading_unit,
         )
         with self.lock:
-            logging.info(info)
+            logging.info(info)  # 계획대로 작동하고 있음을 알림
 
         # 시작 시간
         time_start = time.time()
@@ -262,21 +281,21 @@ class ReinforcementLearner:
         self.epoch_summary_dir = os.path.join(
             self.output_path, 'epoch_summary_{}'.format(self.stock_code))
         if not os.path.isdir(self.epoch_summary_dir):
-            os.makedirs(self.epoch_summary_dir)
+            os.makedirs(self.epoch_summary_dir)  # 폴더 생성
         else:
             for f in os.listdir(self.epoch_summary_dir):
-                os.remove(os.path.join(self.epoch_summary_dir, f))
+                os.remove(os.path.join(self.epoch_summary_dir, f))  # 이미 있으면 폴더에 있는 파일들 삭제
 
         # 학습에 대한 정보 초기화
         max_portfolio_value = 0
-        epoch_win_cnt = 0
+        epoch_win_cnt = 0  # 수익이 발생한 에폭 수 저장
 
         # 학습 반복
         for epoch in tqdm(range(self.num_epoches)):
             time_start_epoch = time.time()
 
             # step 샘플을 만들기 위한 큐
-            q_sample = collections.deque(maxlen=self.num_steps)
+            q_sample = collections.deque(maxlen=self.num_steps)  # 양방향에서 데이터를 처리할 수 있는 queue형 자료구조
             
             # 환경, 에이전트, 신경망, 가시화, 메모리 초기화
             self.reset()
@@ -284,16 +303,16 @@ class ReinforcementLearner:
             # 학습을 진행할 수록 탐험 비율 감소
             if learning:
                 epsilon = 10 / (epoch + 10) if epoch < self.num_epoches - 1 else 0
-                self.agent.reset_exploration()
+                self.agent.reset_exploration()  # exploration_base를 새로 정합니다.
             else:
                 epsilon = self.start_epsilon
                 self.agent.reset_exploration(alpha=0)
 
             for i in tqdm(range(len(self.training_data))):
                 # 샘플 생성
-                next_sample = self.build_sample()
+                next_sample = self.build_sample()  # 환경 객체에서 샘플을 휙득하는 함수
                 if next_sample is None:
-                    break
+                    break  # 마지막까지 데이터를 다 읽은 것이므로 반복문 종료
 
                 # num_steps만큼 샘플 저장
                 q_sample.append(next_sample)
