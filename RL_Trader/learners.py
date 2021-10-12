@@ -302,7 +302,7 @@ class ReinforcementLearner:
 
             # 학습을 진행할 수록 탐험 비율 감소
             if learning:
-                epsilon = 10 / (epoch + 10) if epoch < self.num_epoches - 1 else 0
+                epsilon = self.start_epsilon / (epoch + 10) if epoch < self.num_epoches - 1 else 0
                 self.agent.reset_exploration()  # exploration_base를 새로 정합니다.
             else:
                 epsilon = self.start_epsilon
