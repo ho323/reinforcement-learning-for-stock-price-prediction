@@ -13,16 +13,16 @@ import data_manager
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--stock_code', nargs='+', default=['035420'])  # 강화학습의 환경이 될 주식의 종목 코드입니다. A3C이 경우 여러 개의 종목 코드를 입력합니다.
+    parser.add_argument('--stock_code', nargs='+', default=['005930'])  # 강화학습의 환경이 될 주식의 종목 코드입니다. A3C이 경우 여러 개의 종목 코드를 입력합니다.
     parser.add_argument('--ver', choices=['v1', 'v2', 'v3'], default='v2')  # RL Trader이 버전을 명시합니다. 기본값으로 v3을 사용합니다.
     parser.add_argument('--rl_method', choices=['dqn', 'pg', 'ac', 'a2c', 'a3c', 'monkey'], default='dqn')  # 강화학습 방식을 설정합니다. dqn, pg, ac, a2c, a3c, monkey 중에서 하나를 정합니다.
     parser.add_argument('--net', choices=['dnn', 'lstm', 'cnn', 'monkey'], default='dnn')  # 가치 신경망과 정책 신경망에서 사용할 신경망 유형을 선택합니다. dnn, lstm, cnn, monkey 중에서 하나를 정합니다. 
     parser.add_argument('--num_steps', type=int, default=1)  # lstm과 cnn에서 사용할 Step 크기를 정합니다. 이 크기만큼 자질 벡터의 크기가 확장됩니다.
     parser.add_argument('--lr', type=float, default=0.001)  # 학습 속도를 정합니다. 0.01, 0.001 등으로 정할 수 있습니다.
     parser.add_argument('--discount_factor', type=float, default=0.9)  # 할인율을 정합니다. 0.9, 0.8 등으로 정할 수 있습니다.
-    parser.add_argument('--start_epsilon', type=float, default=0.5)  # 시작 탐험율을 정합니다. 에포크가 수행되면서 탐험률은 감소합니다. 1. 0.5 등으로 정할 수 있습니다.
-    parser.add_argument('--balance', type=int, default=10000000)  # 주식투자 시뮬레이션을 위한 초기 자본금을 설정합니다. 
-    parser.add_argument('--num_epoches', type=int, default=10000)  # 수행할 에포크 수를 지정합니다. 100, 1000 등으로 정할 수 있습니다. 
+    parser.add_argument('--start_epsilon', type=float, default=1)  # 시작 탐험율을 정합니다. 에포크가 수행되면서 탐험률은 감소합니다. 1. 0.5 등으로 정할 수 있습니다.
+    parser.add_argument('--balance', type=int, default=100000000)  # 주식투자 시뮬레이션을 위한 초기 자본금을 설정합니다. 
+    parser.add_argument('--num_epoches', type=int, default=300)  # 수행할 에포크 수를 지정합니다. 100, 1000 등으로 정할 수 있습니다. 
     parser.add_argument('--backend', choices=['tensorflow', 'plaidml'], default='tensorflow')  # Keras으 백엔드로 사용할 프레임워크를 설정합니다. tensorflow와 plaidml을 선택할 수 있습니다.
     parser.add_argument('--output_name', default=utils.get_time_str())  # 로그, 가시화 파일, 신경망 모델 등의 출력 파일을 저장할 폴더의 이름
     parser.add_argument('--value_network_name')  # 가치 신경망 모델 파일명
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         
         # 최소/최대 투자 단위 설정
         min_trading_unit = 1    # max(int(100000 / chart_data.iloc[-1]['close']), 1)
-        max_trading_unit = 1000 # max(int(1000000 / chart_data.iloc[-1]['close']), 1)
+        max_trading_unit = 100 # max(int(1000000 / chart_data.iloc[-1]['close']), 1)
 
         # 공통 파라미터 설정
         common_params = {'rl_method': args.rl_method, 
