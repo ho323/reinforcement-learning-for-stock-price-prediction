@@ -1,3 +1,14 @@
+import threading
+import numpy as np
+import matplotlib.pyplot as plt
+plt.switch_backend('agg')
+
+from mplfinance.original_flavor import candlestick_ohlc
+from agent import Agent
+
+lock = threading.Lock()
+
+
 '''
 속성
 fig: 캔버스 같은 역할을 하는 Matplotlib의 Figure 클래스 객체
@@ -10,16 +21,6 @@ plot(): 일봉 차트를 제외한 나머지 차트를 출력
 save(): Figure를 그림 파일로 저장
 clear(): 일봉 차트를 제외한 나머지 차트를 초기화
 '''
-
-import threading
-import numpy as np
-import matplotlib.pyplot as plt
-plt.switch_backend('agg')
-
-from mplfinance.original_flavor import candlestick_ohlc
-from agent import Agent
-
-lock = threading.Lock()
 
 
 class Visualizer:
