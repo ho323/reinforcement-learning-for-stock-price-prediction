@@ -1,3 +1,9 @@
+import random
+
+import numpy as np
+import utils
+
+
 '''
 속성
 initial_balacne: 초기 투자금
@@ -21,12 +27,6 @@ validate_action(): 행동의 유효성 판단
 decide_trading_unit(): 매수 또는 매도할 주식 수 결정
 act(): 행동 수행
 '''
-
-import random
-
-import numpy as np
-import utils
-
 
 class Agent:
     # 에이전트 상태가 구성하는 값 개수
@@ -75,6 +75,7 @@ class Agent:
         # Agent 클래스의 상태
         self.ratio_hold = 0  # 주식 보유 비율
         self.ratio_portfolio_value = 0  # 포트폴리오 가치 비율
+        self.avg_buy_price = 0  # 주당 매수 단가
 
     def reset(self):
         self.balance = self.initial_balance
@@ -102,11 +103,11 @@ class Agent:
             self.portfolio_value / self.base_portfolio_value
         )
         return (
-            self.ratio_hold, 
-            self.ratio_portfolio_value, 
+            self.ratio_hold,
+            self.ratio_portfolio_value,
             (self.environment.get_price() / self.avg_buy_price) - 1 if self.avg_buy_price > 0 else 0
         )
-    
+
     def decide_action(self, pred_value, pred_policy, epsilon):
         confidence = 0.
 
@@ -120,7 +121,7 @@ class Agent:
         else:
             # 값이 모두 같은 경우 탐험
             maxpred = np.max(pred)
-            if(pred == maxpred).all():
+            if (pred == maxpred).all():
                 epsilon = 1
 
         # 탐험 결정
@@ -157,12 +158,12 @@ class Agent:
     def decide_trading_unit(self, confidence):
         if np.isnan(confidence):
             return self.min_trading_unit
-        added_trading = max(min(
+        added_traiding = max(min(
             int(confidence * (self.max_trading_unit - 
                 self.min_trading_unit)),
             self.max_trading_unit-self.min_trading_unit
         ), 0)
-        return self.min_trading_unit + added_trading
+        return self.min_trading_unit + added_traiding
 
     def act(self, action, confidence):
         if not self.validate_action(action):
