@@ -1,3 +1,18 @@
+import os
+import logging
+import abc
+import collections
+import threading
+import time
+import numpy as np
+from tqdm import tqdm
+from utils import sigmoid
+from environment import Environment
+from agent import Agent
+from networks import Network, DNN, LSTMNetwork, CNN
+from visualizer import Visualizer
+
+
 '''
 속성
 stock_code: 강화학습 대상 주식 종목 코드
@@ -19,21 +34,6 @@ visualize(): 에포크 정보 가시화 함수
 run(): 강화학습 수행 함수
 save_models(): 가치 신경망 및 정책 신경망 저장 함수
 '''
-
-import os
-import logging
-import abc
-import collections
-import threading
-import time
-import numpy as np
-from tqdm import tqdm
-from utils import sigmoid
-from environment import Environment
-from agent import Agent
-from networks import Network, DNN, LSTMNetwork, CNN
-from visualizer import Visualizer
-
 
 # DQNLearner, PolicyGradientLearner, ActorCriticLearner, A2CLearner 등의 클래스가 상속하는 상위 클래스
 # 강화학습에 필요한 환경, 에이전트, 신경망 인스턴스들과 학습 데이터를 속성으로 가집니다.
@@ -302,7 +302,7 @@ class ReinforcementLearner:
 
             # 학습을 진행할 수록 탐험 비율 감소
             if learning:
-                epsilon = 10 / (epoch + 10) if epoch < self.num_epoches - 1 else 0
+                epsilon = self.start_epsilon / (epoch + 10) if epoch < self.num_epoches - 1 else 0
                 self.agent.reset_exploration()  # exploration_base를 새로 정합니다.
             else:
                 epsilon = self.start_epsilon
@@ -374,7 +374,7 @@ class ReinforcementLearner:
                     self.loss, elapsed_time_epoch))
 
             # 에포크 관련 정보 가시화
-            if self.num_epoches == 1 or (epoch + 1) % 100 == 0:
+            if self.num_epoches == 1 or (epoch + 1) % 10 == 0:
                 self.visualize(epoch_str, self.num_epoches, epsilon)
 
             # 학습 관련 정보 갱신
