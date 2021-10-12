@@ -1,3 +1,8 @@
+import os
+import threading
+import numpy as np
+
+
 '''
 속성
 shared_network: 신경망의 상단부로 여러 신경망이 공유할 수 있음(예를 들어, A2C에서는 가치 신경망과 정책 신경망이 신경망의 상단부를 공유하고 하단 부분만 가치 예측과 확률 예측을 위해 달라짐)
@@ -13,11 +18,6 @@ save_model(): 학습한 신경망을 파일로 저장
 load_model(): 파일로 저장한 신경망을 로드
 get_shared_network(): 신경망의 상단부를 생성하는 클래스 함수
 '''
-
-import os
-import threading
-import numpy as np
-
 
 if os.environ['KERAS_BACKEND'] == 'tensorflow':
     from tensorflow.keras.models import Model
