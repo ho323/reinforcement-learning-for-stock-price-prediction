@@ -133,6 +133,7 @@ class ReinforcementLearner:
         if self.reuse_models and os.path.exists(self.value_network_path):
                 self.value_network.load_model(model_path=self.value_network_path)
 
+    # loss에 binary_crossenrtopy인데 output_dim이 3일 경우?
     def init_policy_network(self, shared_network=None, 
             activation='sigmoid', loss='binary_crossentropy'):
         if self.net == 'dnn':
@@ -302,7 +303,7 @@ class ReinforcementLearner:
 
             # 학습을 진행할 수록 탐험 비율 감소
             if learning:
-                epsilon = self.start_epsilon / (epoch + 10) if epoch < self.num_epoches - 1 else 0
+                epsilon = 10 / (epoch + 10) if epoch < self.num_epoches - 1 else 0
                 self.agent.reset_exploration()  # exploration_base를 새로 정합니다.
             else:
                 epsilon = self.start_epsilon
@@ -330,7 +331,7 @@ class ReinforcementLearner:
                 # 신경망 또는 탐험에 의한 행동 결정
                 action, confidence, exploration = self.agent.decide_action(pred_value, pred_policy, epsilon)
 
-                # 결정한 행동을 수행하고 즉시 보상과 지연 보상 획득
+                # 결정한 행동을 수행하고 즉시 보상 획득
                 reward = self.agent.act(action, confidence)
 
                 # 행동 및 행동에 대한 결과를 기억
