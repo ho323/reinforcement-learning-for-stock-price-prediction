@@ -4,8 +4,6 @@ import logging
 import argparse
 import json
 
-from numpy.core.defchararray import not_equal
-
 import settings
 import utils
 import data_manager
