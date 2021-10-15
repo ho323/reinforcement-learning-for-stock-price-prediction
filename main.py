@@ -11,7 +11,7 @@ import data_manager
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--stock_code', nargs='+', default=['000270', '000660', '005380', '005490', '005930', '009240', '009540', '015760', '030200', '035250', '035420', '051910', '105560'])  # 강화학습의 환경이 될 주식의 종목 코드입니다. A3C이 경우 여러 개의 종목 코드를 입력합니다.
+    parser.add_argument('--stock_code', nargs='+', default=['000270', '000660', '005380', '005490', '005930'])  # 강화학습의 환경이 될 주식의 종목 코드입니다. A3C이 경우 여러 개의 종목 코드를 입력합니다.
     parser.add_argument('--ver', choices=['v1', 'v2', 'v3'], default='v1')  # RL Trader이 버전을 명시합니다. 기본값으로 v3을 사용합니다.
     parser.add_argument('--rl_method', choices=['dqn', 'pg', 'ac', 'a2c', 'a3c', 'monkey'], default='a3c')  # 강화학습 방식을 설정합니다. dqn, pg, ac, a2c, a3c, monkey 중에서 하나를 정합니다.
     parser.add_argument('--net', choices=['dnn', 'lstm', 'cnn', 'monkey'], default='lstm')  # 가치 신경망과 정책 신경망에서 사용할 신경망 유형을 선택합니다. dnn, lstm, cnn, monkey 중에서 하나를 정합니다. 
@@ -127,11 +127,7 @@ if __name__ == '__main__':
                 args.learning = False
                 learner = ReinforcementLearner(**common_params)
             if learner is not None:
-                learner.run(balance=args.balance, 
-                    num_epoches=args.num_epoches, 
-                    discount_factor=args.discount_factor, 
-                    start_epsilon=args.start_epsilon,
-                    learning=args.learning)
+                learner.run(learning=args.learning)
                 learner.save_models()
         else:
             list_stock_code.append(stock_code)
@@ -150,8 +146,5 @@ if __name__ == '__main__':
             'list_max_trading_unit': list_max_trading_unit,
             'value_network_path': value_network_path, 
             'policy_network_path': policy_network_path})
-        learner.run(balance=args.balance, num_epoches=args.num_epoches, 
-                    discount_factor=args.discount_factor, 
-                    start_epsilon=args.start_epsilon,
-                    learning=args.learning)
+        learner.run(learning=args.learning)
         learner.save_models()

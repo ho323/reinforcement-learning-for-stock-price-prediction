@@ -19,13 +19,14 @@ load_model(): 파일로 저장한 신경망을 로드
 get_shared_network(): 신경망의 상단부를 생성하는 클래스 함수
 '''
 
+
 if os.environ['KERAS_BACKEND'] == 'tensorflow':
     from tensorflow.keras.models import Model
     from tensorflow.keras.layers import Input, Dense, LSTM, Conv2D, \
         BatchNormalization, Dropout, MaxPooling2D, Flatten
     from tensorflow.keras.optimizers import SGD
     import tensorflow as tf
-    tf.compat.v1.disable_v2_behavior()
+    # tf.compat.v1.disable_v2_behavior()
     print('Eager Mode: {}'.format(tf.executing_eagerly()))
 elif os.environ['KERAS_BACKEND'] == 'plaidml.keras.backend':
     from keras.models import Model

@@ -222,14 +222,14 @@ class Agent:
         elif action == Agent.ACTION_HOLD:
             self.num_hold += 1  # 홀딩 횟수 증가
 
-        # 포트폴리오 가치 갱신
-        self.portfolio_value = self.balance + curr_price \
-            * self.num_stocks
+        #  포트폴리오 가치 갱신
+        self.portfolio_value = self.balance + curr_price * self.num_stocks
         self.profitloss = (
-            (self.portfolio_value - self.initial_balance) \
-                / self.initial_balance
+            (self.portfolio_value - self.initial_balance) / self.initial_balance
         )
 
+        return self.profitloss
+        '''
         # 즉시 보상 - 수익률
         self.immediate_reward = self.profitloss
 
@@ -249,3 +249,4 @@ class Agent:
             delayed_reward = 0
 
         return self.immediate_reward, delayed_reward
+        '''
