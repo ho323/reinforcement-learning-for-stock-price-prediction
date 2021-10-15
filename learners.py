@@ -257,16 +257,17 @@ class ReinforcementLearner:
         )
 
     # ReinforcementLearner 클래스의 핵심 함수
-    def run(self, learning=True):
-        # 제목
-        info = (
-            "[{code}] RL:{rl} Net:{net} LR:{lr} "
-            "DF:{discount_factor} TU:[{min_trading_unit},{max_trading_unit}]"
-        ).format(
+    def run(
+        self, num_epoches=100, balance=10000000,
+        discount_factor=0.9, start_epsilon=0.5, learning=True):
+        info = "[{code}] RL:{rl} Net:{net} LR:{lr} " \
+            "DF:{discount_factor} TU:[{min_trading_unit}," \
+            "{max_trading_unit}] DRT:{delayed_reward_threshold}".format(
             code=self.stock_code, rl=self.rl_method, net=self.net,
-            lr=self.lr, discount_factor=self.discount_factor,
+            lr=self.lr, discount_factor=discount_factor,
             min_trading_unit=self.agent.min_trading_unit, 
             max_trading_unit=self.agent.max_trading_unit,
+            delayed_reward_threshold=self.agent.delayed_reward_threshold
         )
         with self.lock:
             logging.info(info)  # 계획대로 작동하고 있음을 알림
@@ -588,14 +589,16 @@ class A3CLearner(ReinforcementLearner):
                 policy_network=self.policy_network, **kwargs)
             self.learners.append(learner)
 
-    def run(self, learning=True):
+    def run(
+        self, num_epoches=100, balance=10000000,
+        discount_factor=0.9, start_epsilon=0.9, learning=True):
         threads = []
         for learner in self.learners:
             threads.append(threading.Thread(
                 target=learner.run, daemon=True, kwargs={
-                'num_epoches': self.num_epoches, 'balance': self.agent.balance,
-                'discount_factor': self.discount_factor, 
-                'start_epsilon': self.start_epsilon,
+                'num_epoches': num_epoches, 'balance': balance,
+                'discount_factor': discount_factor, 
+                'start_epsilon': start_epsilon,
                 'learning': learning
             }))
         for thread in threads:
