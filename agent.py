@@ -48,17 +48,14 @@ class Agent:
     NUM_ACTIONS = len(ACTIONS)  # 인공 신경망에서 고려할 출력값의 개수
 
     def __init__(
-        self, environment, balance, min_trading_unit=1, max_trading_unit=2, delayed_reward_threshold=.05):
+        self, environment, balance, min_trading_unit=1, max_trading_unit=2):
         # Environment 객체
         # 현재 주식 가격을 가져오기 위해 환경 참조
         self.environment = environment
 
         # 최소 매매 단위, 최대 매매 단위, 지연보상 임계치
         self.min_trading_unit = min_trading_unit  # 최소 단일 거래 단위
-        
         self.max_trading_unit = max_trading_unit  # 최대 단일 거래 단위
-        # 지연보상 임계치
-        self.delayed_reward_threshold = delayed_reward_threshold
 
         # Agent 클래스의 속성
         self.initial_balance = balance  # 초기 자본금
@@ -222,7 +219,7 @@ class Agent:
         elif action == Agent.ACTION_HOLD:
             self.num_hold += 1  # 홀딩 횟수 증가
 
-        #  포트폴리오 가치 갱신
+        # 포트폴리오 가치 갱신
         self.portfolio_value = self.balance + curr_price * self.num_stocks
         self.profitloss = (
             (self.portfolio_value - self.initial_balance) / self.initial_balance
