@@ -258,14 +258,14 @@ class ReinforcementLearner:
 
     # ReinforcementLearner 클래스의 핵심 함수
     def run(self, learning=True):
-        info = "[{code}] RL:{rl} Net:{net} LR:{lr} " \
-            "DF:{discount_factor} TU:[{min_trading_unit}," \
-            "{max_trading_unit}] DRT:{delayed_reward_threshold}".format(
+        info = (
+            "[{code}] RL:{rl} Net:{net} LR:{lr} "
+            "DF:{discount_factor} TU:[{min_trading_unit},{max_trading_unit}]"
+        ).format(
             code=self.stock_code, rl=self.rl_method, net=self.net,
             lr=self.lr, discount_factor=self.discount_factor,
             min_trading_unit=self.agent.min_trading_unit, 
             max_trading_unit=self.agent.max_trading_unit,
-            delayed_reward_threshold=self.agent.delayed_reward_threshold
         )
         with self.lock:
             logging.info(info)  # 계획대로 작동하고 있음을 알림
