@@ -11,9 +11,9 @@ import data_manager
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--stock_code', nargs='+', default=['030200'])  # 강화학습의 환경이 될 주식의 종목 코드입니다. A3C이 경우 여러 개의 종목 코드를 입력합니다.
+    parser.add_argument('--stock_code', nargs='+', default=['030200', '000270', '005380'])  # 강화학습의 환경이 될 주식의 종목 코드입니다. A3C이 경우 여러 개의 종목 코드를 입력합니다.
     parser.add_argument('--ver', choices=['v1', 'v2', 'v3'], default='v1')  # RL Trader이 버전을 명시합니다. 기본값으로 v3을 사용합니다.
-    parser.add_argument('--rl_method', choices=['dqn', 'pg', 'ac', 'a2c', 'a3c', 'monkey'], default='a2c')  # 강화학습 방식을 설정합니다. dqn, pg, ac, a2c, a3c, monkey 중에서 하나를 정합니다.
+    parser.add_argument('--rl_method', choices=['dqn', 'pg', 'ac', 'a2c', 'a3c', 'monkey'], default='a3c')  # 강화학습 방식을 설정합니다. dqn, pg, ac, a2c, a3c, monkey 중에서 하나를 정합니다.
     parser.add_argument('--net', choices=['dnn', 'lstm', 'cnn', 'monkey'], default='dnn')  # 가치 신경망과 정책 신경망에서 사용할 신경망 유형을 선택합니다. dnn, lstm, cnn, monkey 중에서 하나를 정합니다. 
     parser.add_argument('--num_steps', type=int, default=1)  # lstm과 cnn에서 사용할 Step 크기를 정합니다. 이 크기만큼 자질 벡터의 크기가 확장됩니다.
     parser.add_argument('--lr', type=float, default=0.001)  # 학습 속도를 정합니다. 0.01, 0.001 등으로 정할 수 있습니다.
@@ -87,8 +87,8 @@ if __name__ == '__main__':
             stock_code, args.start_date, args.end_date, ver=args.ver)
         
         # 최소/최대 투자 단위 설정
-        min_trading_unit = max(int(100000 / chart_data.iloc[-1]['close']), 1)
-        max_trading_unit = max(int(1000000 / chart_data.iloc[-1]['close']), 1)
+        min_trading_unit = max(int((args.balance/10) / chart_data.iloc[-1]['close']), 1)
+        max_trading_unit = max(int(args.balance / chart_data.iloc[-1]['close']), 1)
 
         # 공통 파라미터 설정
         common_params = {'rl_method': args.rl_method, 
