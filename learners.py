@@ -455,6 +455,7 @@ class DQNLearner(ReinforcementLearner):
         y_value = np.zeros((len(self.memory_sample), self.agent.NUM_ACTIONS))
         value_max_next = 0
         for i, (sample, action, value, reward) in enumerate(memory):
+            print(i, '\nsample\n', sample, '\n\naction\n', action, '\n\nvalue\n', value, '\n\nreward\n', reward,'\n---------------------')
             x[i] = sample
             r = self.memory_reward[-1] - reward
             y_value[i] = value
