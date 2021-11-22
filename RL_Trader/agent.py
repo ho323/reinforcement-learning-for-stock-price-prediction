@@ -226,14 +226,12 @@ class Agent:
         )
 
         return self.profitloss
-
         '''
         # 즉시 보상 - 수익률
         self.immediate_reward = self.profitloss
 
         # 지연 보상 - 익절, 손절 기준
         delayed_reward = 0
-
         self.base_profitloss = (
             (self.portfolio_value - self.base_portfolio_value) \
                 / self.base_portfolio_value

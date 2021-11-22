@@ -258,7 +258,6 @@ class ReinforcementLearner:
 
     # ReinforcementLearner 클래스의 핵심 함수
     def run(self, learning=True):
-        # 제목
         info = (
             "[{code}] RL:{rl} Net:{net} LR:{lr} "
             "DF:{discount_factor} TU:[{min_trading_unit},{max_trading_unit}]"
@@ -592,12 +591,7 @@ class A3CLearner(ReinforcementLearner):
         threads = []
         for learner in self.learners:
             threads.append(threading.Thread(
-                target=learner.run, daemon=True, kwargs={
-                'num_epoches': self.num_epoches, 'balance': self.agent.balance,
-                'discount_factor': self.discount_factor, 
-                'start_epsilon': self.start_epsilon,
-                'learning': learning
-            }))
+                target=learner.run, daemon=True, kwargs={'learning': learning}))
         for thread in threads:
             thread.start()
             time.sleep(1)
